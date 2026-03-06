@@ -1,9 +1,11 @@
- const rateLimit = require("express-rate-limit");
+const rateLimit = require("express-rate-limit");
+const { ipKeyGenerator } = require("express-rate-limit");
 const RedisStore = require("rate-limit-redis");
 const { createClient } = require("redis");
 const config = require("../config");
 
 let redisClient;
+let redisStore;
 
 async function initRateLimitRedis() {
   if (!config.redis.url) {
@@ -18,6 +20,10 @@ async function initRateLimitRedis() {
   });
 
   await redisClient.connect();
+
+  redisStore = new RedisStore({
+    sendCommand: (...args) => redisClient.sendCommand(args),
+  });
 }
 
 const widgetRateLimiter = rateLimit({
@@ -26,15 +32,11 @@ const widgetRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 
-  store: redisClient
-    ? new RedisStore({
-        sendCommand: (...args) => redisClient.sendCommand(args),
-      })
-    : undefined,
+  store: undefined,
 
   keyGenerator: (req) => {
     const sig = req.query.sig || "nosig";
-    return `${req.ip}:${sig.slice(0, 8)}`;
+    return `${ipKeyGenerator(req)}:${sig.slice(0, 8)}`;
   },
 
   handler: (req, res) => {
@@ -42,7 +44,14 @@ const widgetRateLimiter = rateLimit({
   },
 });
 
+function attachRateLimitStore() {
+  if (redisStore) {
+    widgetRateLimiter.store = redisStore;
+  }
+}
+
 module.exports = {
   widgetRateLimiter,
   initRateLimitRedis,
+  attachRateLimitStore,
 };

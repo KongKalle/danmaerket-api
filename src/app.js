@@ -2,8 +2,11 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const certRouter = require("./routes/cert");
-const config = require("./config");
 const internalRouter = require("./routes/internal");
+const {
+  initRateLimitRedis,
+  attachRateLimitStore,
+} = require("./middleware/rateLimit");
 
 const app = express();
 
@@ -17,6 +20,15 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+(async () => {
+  try {
+    await initRateLimitRedis();
+    attachRateLimitStore();
+  } catch (err) {
+    console.error("Rate limit Redis init fejl:", err);
+  }
+})();
 
 app.use("/api/v1", certRouter);
 app.use("/internal", internalRouter);
