@@ -144,4 +144,12 @@ router.post("/member/sync", requireInternalKey, async (req, res) => {
   }
 });
 
+router.get("/debug-version", (req, res) => {
+  res.json({
+    ok: true,
+    version: "member-sync-v1",
+    hasMemberSync: true
+  });
+});
+
 module.exports = router;
