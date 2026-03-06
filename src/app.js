@@ -12,7 +12,7 @@ app.set("trust proxy", 1);
 app.use(helmet());
 app.use(cors({
   origin: true,
-  methods: ["GET"],
+  methods: ["GET", "POST"],
   maxAge: 300,
 }));
 
