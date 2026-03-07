@@ -115,7 +115,7 @@ router.post("/member/sync", requireInternalKey, async (req, res) => {
 
     const scoreMap = {
       identitet: Number(scores.identitet ?? 0),
-      "troværdighed": Number(scores["troværdighed"] ?? 0),
+      trovaerdighed: Number(scores.trovaerdighed ?? scores["troværdighed"] ?? 0),
       teknisk: Number(scores.teknisk ?? 0),
     };
 
