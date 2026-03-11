@@ -2,7 +2,7 @@
 const { getCached, setCache } = require("./cacheService");
 
 async function getMemberBySigAndDomain(sig, domain) {
-  const cacheKey = `cert:${domain}`;
+  const cacheKey = `cert:${domain}:${sig}`;
   const cached = await getCached(cacheKey);
 
   if (cached) return cached;
